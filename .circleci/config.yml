@@ -2,6 +2,27 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+commands:
+  clang_format_lint:
+    description: "Perform clang-format linting"
+    parameters:
+      source:
+        type: string
+      extensions:
+        type: string
+      style:
+        type: string
+        default: "file"
+    steps:
+      - run: echo "TODO"
+
+  checkout_full:
+    description: "Checkout the whole package of MMDeploy"
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
@@ -25,14 +46,38 @@ jobs:
       - run:
           name: Linting
           command: pre-commit run --all-files
+      - clang_format_lint:
+          name: Format c/cuda codes with clang-format
+          source: csrc
+          extensions: h,c,cpp,hpp,cu,cuh
+          style: file
       - run:
           name: Check docstring coverage
           command: |
             pip install interrogate
             interrogate -v --ignore-init-method --ignore-module --ignore-nested-functions --ignore-regex "__repr__" --fail-under 80 mmdeploy
+
+  # build mmdeploy using its CPU Dockerfile
+  test_cpu:
+    machine:
+      image: ubuntu-2004:202111-02
+      docker_layer_caching: true
+    resource_class: large
+    working_directory: ~/
+    steps:
+      - checkout_full
+#      - run:
+#          name: Build mmdeploy-cpu docker image
+#          command: |
+#            cd mmdeploy
+#            docker build docker/CPU/ -t mmdeploy:cpu
+
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   pr_stage_test:
     jobs:
       - lint
+      - test_cpu:
+          name: build cpu version on ubuntu platform
