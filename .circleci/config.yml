@@ -5,6 +5,7 @@ version: 2.1
 commands:
   clang_format_lint:
     description: "Perform clang-format linting"
+#    name: Format c/cuda codes with clang-format
     parameters:
       source:
         type: string
@@ -47,7 +48,6 @@ jobs:
           name: Linting
           command: pre-commit run --all-files
       - clang_format_lint:
-          name: Format c/cuda codes with clang-format
           source: csrc
           extensions: h,c,cpp,hpp,cu,cuh
           style: file
