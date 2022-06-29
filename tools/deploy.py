@@ -235,7 +235,6 @@ def main():
             model_param_path, model_bin_path = get_output_model_file(
                 onnx_path, args.work_dir)
             onnx_name = osp.splitext(osp.split(onnx_path)[1])[0]
-            ncnn_api.from_onnx(onnx_path, osp.join(args.work_dir, onnx_name))
 
             if quant:
                 from onnx2ncnn_quant_table import get_table
@@ -255,6 +254,9 @@ def main():
                     kwargs=dict(),
                     ret_value=ret_value)
 
+                ncnn_api.from_onnx(quant_onnx,
+                                   osp.join(args.work_dir, onnx_name))
+
                 create_process(
                     'ncnn_int8',
                     target=ncnn2int8,
@@ -264,6 +266,8 @@ def main():
                     ret_value=ret_value)
                 backend_files += [quant_param, quant_bin]
             else:
+                ncnn_api.from_onnx(onnx_path, osp.join(args.work_dir,
+                                                       onnx_name))
                 backend_files += [model_param_path, model_bin_path]
 
     elif backend == Backend.OPENVINO:

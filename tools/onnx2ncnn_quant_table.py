@@ -45,24 +45,27 @@ def get_table(onnx_path: str,
         break
 
     from ppq import QuantizationSettingFactory, TargetPlatform
-    from ppq.api import export_ppq_graph, quantize_onnx_model
+    from ppq.api import (ENABLE_CUDA_KERNEL, export_ppq_graph,
+                         quantize_onnx_model)
 
-    # settings for ncnn quantization
-    quant_setting = QuantizationSettingFactory.default_setting()
-    quant_setting.equalization = False
-    quant_setting.dispatcher = 'conservative'
+    with ENABLE_CUDA_KERNEL():
+        # settings for ncnn quantization
+        quant_setting = QuantizationSettingFactory.ncnn_setting()
+        quant_setting.equalization = False
+        quant_setting.dispatcher = 'conservative'
 
-    # quantize the model
-    quantized = quantize_onnx_model(
-        onnx_import_file=onnx_path,
-        calib_dataloader=dataloader,
-        calib_steps=max(8, min(512, len(dataset))),
-        input_shape=input_shape,
-        setting=quant_setting,
-        collate_fn=collate_fn,
-        platform=TargetPlatform.NCNN_INT8,
-        device=device,
-        verbose=1)
+        # quantize the model
+
+        quantized = quantize_onnx_model(
+            onnx_import_file=onnx_path,
+            calib_dataloader=dataloader,
+            calib_steps=max(8, min(512, len(dataset))),
+            input_shape=input_shape,
+            setting=quant_setting,
+            collate_fn=collate_fn,
+            platform=TargetPlatform.NCNN_INT8,
+            device=device,
+            verbose=1)
 
     # export quantized graph and quant table
     export_ppq_graph(
