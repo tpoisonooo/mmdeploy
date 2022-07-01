@@ -22,7 +22,7 @@ def get_quant_model_file(onnx_path: str, work_dir: str) -> List[str]:
     mmcv.mkdir_or_exist(osp.abspath(work_dir))
     base_name = osp.splitext(osp.split(onnx_path)[1])[0]
     quant_onnx = osp.join(work_dir, base_name + '_quant.onnx')
-    quant_table = osp.join(work_dir, base_name + '.table')
+    quant_table = osp.join(work_dir, base_name + '.ini')
     quant_param = osp.join(work_dir, base_name + '_int8.param')
     quant_bin = osp.join(work_dir, base_name + '_int8.bin')
     return [quant_onnx, quant_table, quant_param, quant_bin]
