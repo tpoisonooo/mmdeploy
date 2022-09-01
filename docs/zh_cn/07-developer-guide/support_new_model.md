@@ -1,6 +1,14 @@
-# 如何支持新的模型
+# 如何给 mmdeploy 添加新模型
 
-我们提供了多种工具来支持模型转换
+开发资源总是有限的，mmdeploy 目前没有让所有后端支持所有模型（[这里](../03-benchmark/)是测试列表）。如果你已经
+
+- 知晓 [onnx](https://github.com/onnx/onnx) 的载体是一个 protobuf
+- 熟悉待支持模型的推理过程
+- 了解推理后端的 Python API
+
+可以参考此文档，为喜爱的后端和模型添加 mmdeploy 支持。
+
+我们以 ncnn 和 mmcls 为例，假设要支持 [ViT](https://arxiv.org/abs/2010.11929) 模型。
 
 ## 函数的重写器
 
