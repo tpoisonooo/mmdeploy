@@ -24,20 +24,31 @@ pattern = re.compile(r'\[.*?\]\(.*?\)')
 def analyze_doc(home, path):
     print('analyze {}'.format(path))
     problem_list = []
-    code_block = 0
+    code_block = False
     with open(path) as f:
         lines = f.readlines()
         for line in lines:
             line = line.strip()
             if line.startswith('```'):
-                code_block = 1 - code_block
+                code_block = not code_block
+                continue
 
-            if code_block > 0:
+            if code_block is True:
                 continue
 
             if '[' in line and ']' in line and '(' in line and ')' in line:
                 all = pattern.findall(line)
                 for item in all:
+                    print(item)
+                    # skip  ![]()
+                    if item.find('[') == item.find(']') - 1:
+                        continue
+
+                    # process the case [text()]()
+                    offset = item.find('](')
+                    if offset == -1:
+                        continue
+                    item = item[offset:]
                     start = item.find('(')
                     end = item.find(')')
                     ref = item[start + 1:end]
@@ -61,7 +72,7 @@ def analyze_doc(home, path):
 
 def traverse(target):
     if os.path.isfile(target):
-        analyze_doc(os.path.dirname(target), target)
+        analyze_doc('./', target)
         return
     for home, dirs, files in os.walk(target):
         for filename in files:
