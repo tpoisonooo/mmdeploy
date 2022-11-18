@@ -4,6 +4,7 @@ import sys
 import time
 
 from ubuntu_utils import cmd_result, ensure_base_env, get_job
+from pathlib import Path
 
 g_jobs = 2
 
@@ -126,6 +127,7 @@ def install_mmdeploy(work_dir, dep_dir, ncnn_cmake_dir):
     cmd += ' -DProtobuf_LIBRARIES={} '.format(pb_lib)
     cmd += ' -DProtobuf_INCLUDE_DIR={} '.format(pb_include)
     cmd += ' -Dncnn_DIR={} '.format(ncnn_cmake_dir)
+    cmd += ' -DOpenCV_DIR=/home/rg/konghuanjun/ocv_install/lib/cmake/opencv4'
     os.system(cmd)
 
     os.system('cd build && make -j {} && make install'.format(g_jobs))
@@ -175,7 +177,7 @@ def main():
     if install_mmdeploy(work_dir, dep_dir, ncnn_cmake_dir) != 0:
         return -1
 
-    if os.path.exists('~/mmdeploy.env'):
+    if os.path.exists(Path('~/mmdeploy.env').expanduser()):
         print('Please source ~/mmdeploy.env to setup your env !')
         os.system('cat ~/mmdeploy.env')
 

@@ -103,11 +103,11 @@ def main():
     log_level = logging.getLevelName(args.log_level)
     logger.setLevel(log_level)
 
-    pipeline_funcs = [
-        torch2onnx, torch2torchscript, extract_model, create_calib_input_data
-    ]
-    PIPELINE_MANAGER.enable_multiprocess(True, pipeline_funcs)
-    PIPELINE_MANAGER.set_log_level(log_level, pipeline_funcs)
+    # pipeline_funcs = [
+    #     torch2onnx, torch2torchscript, extract_model, create_calib_input_data
+    # ]
+    # PIPELINE_MANAGER.enable_multiprocess(True, pipeline_funcs)
+    # PIPELINE_MANAGER.set_log_level(log_level, pipeline_funcs)
 
     deploy_cfg_path = args.deploy_cfg
     model_cfg_path = args.model_cfg
@@ -256,13 +256,16 @@ def main():
                 quant_onnx, quant_table, quant_param, quant_bin = get_quant_model_file(  # noqa: E501
                     onnx_path, args.work_dir)
 
-                create_process(
-                    'ncnn quant table',
-                    target=get_table,
-                    args=(onnx_path, deploy_cfg, model_cfg, quant_onnx,
-                          quant_table, quant_image_dir, args.device),
-                    kwargs=dict(),
-                    ret_value=ret_value)
+                get_table(onnx_path, deploy_cfg, model_cfg, quant_onnx,
+                          quant_table, quant_image_dir, args.device)
+                
+                # create_process(
+                #     'ncnn quant table',
+                #     target=get_table,
+                #     args=(onnx_path, deploy_cfg, model_cfg, quant_onnx,
+                #           quant_table, quant_image_dir, args.device),
+                #     kwargs=dict(),
+                #     ret_value=ret_value)
 
                 create_process(
                     'ncnn_int8',

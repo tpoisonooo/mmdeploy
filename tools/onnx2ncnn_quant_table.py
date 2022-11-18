@@ -33,28 +33,29 @@ def get_table(onnx_path: str,
             path=image_dir, deploy_cfg=deploy_cfg, model_cfg=model_cfg)
         calib_dataloader['dataset'] = dataset
         dataloader = task_processor.build_dataloader(calib_dataloader)
-        # dataloader = DataLoader(dataset, batch_size=1)
     else:
         dataset = task_processor.build_dataset(calib_dataloader['dataset'])
         calib_dataloader['dataset'] = dataset
         dataloader = task_processor.build_dataloader(calib_dataloader)
 
     data_preprocessor = task_processor.build_data_preprocessor()
+    
 
-    # get an available input shape randomly
-    for _, input_data in enumerate(dataloader):
-        input_data = data_preprocessor(input_data)
-        input_tensor = input_data[0]
-        if isinstance(input_tensor, list):
-            input_shape = input_tensor[0].shape
-            collate_fn = lambda x: data_preprocessor(x[0])[0].to(  # noqa: E731
-                device)
-        else:
-            input_shape = input_tensor.shape
-            collate_fn = lambda x: data_preprocessor(x)[0].to(  # noqa: E731
-                device)
-        break
+    def preproc_fn(x):
+        if type(x['inputs'][0]) is tuple:
+            x['inputs'][0] = x['inputs'][0][0]
+        
+        # from remote_pdb import RemotePdb
+        # RemotePdb('0.0.0.0', 4444).set_trace()
+        from mmengine.registry import DefaultScope
+        print("*********************** scope {}".format(DefaultScope.get_current_instance().scope_name))
+        x = data_preprocessor(x)
+        return x['inputs'].to(device)
 
+    import pdb
+    pdb.set_trace()
+    input_shape = preproc_fn(dataset[0]).shape
+    
     from ppq import QuantizationSettingFactory, TargetPlatform
     from ppq.api import export_ppq_graph, quantize_onnx_model
 
@@ -70,7 +71,7 @@ def get_table(onnx_path: str,
         calib_steps=max(8, min(512, len(dataset))),
         input_shape=input_shape,
         setting=quant_setting,
-        collate_fn=collate_fn,
+        collate_fn=preproc_fn,
         platform=TargetPlatform.NCNN_INT8,
         device=device,
         verbose=1)

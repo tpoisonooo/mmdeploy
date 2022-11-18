@@ -137,7 +137,11 @@ class Classification(BaseTask):
             nn.Module: A model build with mmcls data_preprocessor.
         """
         model_cfg = deepcopy(self.model_cfg)
-        data_preprocessor = deepcopy(model_cfg.get('preprocess_cfg', {}))
+        if model_cfg.get('preprocess_cfg') is not None:
+            data_preprocessor = deepcopy(model_cfg.get('preprocess_cfg'))
+        else:
+            data_preprocessor = deepcopy(model_cfg.get('data_preprocessor', {}))
+            
         data_preprocessor.setdefault('type', 'mmcls.ClsDataPreprocessor')
 
         from mmengine.registry import MODELS
@@ -193,6 +197,7 @@ class Classification(BaseTask):
             imgs = [imgs]
         assert 'test_pipeline' in self.model_cfg, \
             f'test_pipeline not found in {self.model_cfg}.'
+
         model_cfg = process_model_config(self.model_cfg, imgs, input_shape)
         pipeline = deepcopy(model_cfg.test_pipeline)
         move_pipeline = []
@@ -200,6 +205,8 @@ class Classification(BaseTask):
             sub_pipeline = pipeline.pop(-1)
             move_pipeline = [sub_pipeline] + move_pipeline
         pipeline = pipeline[:-1] + move_pipeline + pipeline[-1:]
+        
+        from mmengine import TRANSFORM
         pipeline = Compose(pipeline)
 
         data = []

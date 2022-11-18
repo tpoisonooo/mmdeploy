@@ -69,4 +69,4 @@ def from_onnx(onnx_model: Union[onnx.ModelProto, str],
 
     onnx2ncnn_path = get_onnx2ncnn_path()
     ret_code = call([onnx2ncnn_path, onnx_path, save_param, save_bin])
-    assert ret_code == 0, 'onnx2ncnn failed'
+    assert ret_code == 0, 'mmdeploy_onnx2ncnn failed'
