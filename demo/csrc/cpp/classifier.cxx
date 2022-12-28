@@ -27,10 +27,13 @@ int main(int argc, char* argv[]) {
   mmdeploy::Model model(model_path);
   mmdeploy::Classifier classifier(model, context);
 
-  auto res = classifier.Apply(img);
+  const int REPEAT = 20;
+  for (int i = 0; i < REPEAT; ++i) {
+    auto res = classifier.Apply(img);
 
-  for (const auto& cls : res) {
-    fprintf(stderr, "label: %d, score: %.4f\n", cls.label_id, cls.score);
+    for (const auto& cls : res) {
+      fprintf(stderr, "label: %d, score: %.4f\n", cls.label_id, cls.score);
+    }
   }
 
   return 0;
