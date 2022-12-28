@@ -1,5 +1,6 @@
 
 #include "mmdeploy/classifier.hpp"
+#include "mmdeploy/common.hpp"
 
 #include <string>
 
@@ -19,8 +20,12 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  mmdeploy::Profiler profiler{"/deploee-tmp/profile.bin"};
+  mmdeploy::Context context(mmdeploy::Device(device_name, 0));
+  context.Add(profiler);
+
   mmdeploy::Model model(model_path);
-  mmdeploy::Classifier classifier(model, mmdeploy::Device{device_name, 0});
+  mmdeploy::Classifier classifier(model, context);
 
   auto res = classifier.Apply(img);
 
